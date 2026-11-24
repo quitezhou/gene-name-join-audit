@@ -300,7 +300,8 @@ def main():
         actual = hashlib.sha256(path.read_bytes()).hexdigest()
         assert actual == expected, (name, actual, expected)
         assert path.with_suffix(".pdf").read_bytes().startswith(b"%PDF")
-    print("Source checks, study replays and all three submission figure PNG digests passed.")
+    runpy.run_path(str(ROOT / "check_genejoin.py"), run_name="__main__")
+    print("Source checks, study replays, three submission figures and installed genejoin passed.")
 
 
 if __name__ == "__main__":

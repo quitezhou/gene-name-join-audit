@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=61", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "genejoin"
+version = "0.1.0"
+description = "Check gene-name joins between transcriptomic datasets before trusting them"
+readme = "README.md"
+requires-python = ">=3.9"
+license = { file = "LICENSE" }
+authors = [{ name = "Genejoin contributors" }]
+keywords = ["gene identifiers", "AnnData", "single-cell", "spatial transcriptomics", "reproducibility"]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "License :: OSI Approved :: MIT License",
+  "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = []
+
+[project.optional-dependencies]
+anndata = ["anndata>=0.8"]
+test = ["pytest"]
+
+[project.scripts]
+genejoin = "genejoin.cli:main"
+
+[project.urls]
+Source = "https://github.com/quitezhou/gene-name-join-audit"
+Issues = "https://github.com/quitezhou/gene-name-join-audit/issues"
+
+[tool.setuptools.packages.find]
+where = ["src"]

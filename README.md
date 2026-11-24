@@ -1,6 +1,28 @@
 # Auditing gene-name joins in transcriptomic datasets
 
-Analysis code for *Gene filtering can change which record a shared name identifies across transcriptomic datasets*. The audit checks whether a shared final name points to different source IDs and whether one shared ID appears under different final names.
+Analysis code for *Joining transcriptomic datasets by gene name can silently pair different genes, even from one reference*. The audit checks whether a shared final name points to different source IDs and whether one shared ID appears under different final names.
+
+## Check your own join with genejoin
+
+For every shared name, genejoin checks whether both datasets assign it the same stable ID. For every shared, individually identifiable ID, it checks whether both datasets give it the same name.
+
+Install the [version 0.1.0 release wheel](https://github.com/quitezhou/gene-name-join-audit/releases/tag/v0.1.0) with Python 3.9 or later. The core has no runtime dependencies.
+
+```sh
+python -m pip install "https://github.com/quitezhou/gene-name-join-audit/releases/download/v0.1.0/genejoin-0.1.0-py3-none-any.whl"
+genejoin check sampleA/features.tsv.gz sampleB/features.tsv.gz
+```
+
+For AnnData files install the optional dependency.
+
+```sh
+python -m pip install "genejoin[anndata] @ https://github.com/quitezhou/gene-name-join-audit/releases/download/v0.1.0/genejoin-0.1.0-py3-none-any.whl"
+genejoin check reference.h5ad spatial.h5ad --events discordances.tsv
+```
+
+The checker exits with status 0 for no detected discordance, 1 for a discordance and 2 for an input or output error. Check the overlap counts to see how many records could be compared. The Python interface accepts in-memory objects via `genejoin.check_anndata(adata_a, adata_b)`.
+
+The [package guide](genejoin/README.md) describes recovery when a processed object lacks stable IDs. The [test input guide](genejoin/tests/data/README.md) explains how to reproduce the probe-panel, lung, blood and AnnData checks. The [MIT license](genejoin/LICENSE) covers the genejoin package.
 
 ## Try a pair of gene tables
 
@@ -27,7 +49,7 @@ The package check uses Python 3.11. It verifies the payload against its SHA-256 
 
 | Supplement | SHA-256 |
 | --- | --- |
-| Additional_file_2.zip | `4d2cf795d6012f03dca774abcf8a0a9a36b9af6d6ff4420f22ca7ad7c995ad3d` |
+| Additional_file_2.zip | `a35c7d700032f6bdb8465242763405636dea67f6193238ee5c46746aff3e5dd0` |
 | Additional_file_3.zip | `1603f7dfea361d043632b3159267ac2b4c7e119dcb9f3489a16dc171561e65e0` |
 
 ## Code map
