@@ -1,0 +1,13 @@
+library(SeuratObject)
+library(Matrix)
+cache_dir<-Sys.getenv("HWAT_CACHE",unset=Sys.getenv("TEMP",unset=tempdir()))
+x<-readRDS(file.path(cache_dir,"se-object.visium_baseline.rds"))
+a<-x@assays$RNA@counts
+wanted<-unique(c(readLines("candidate_symbols.txt"),readLines("control_symbols.txt")))
+keep<-which(x@meta.data$novaseq_id=="S42")
+genes<-intersect(wanted,rownames(a))
+prefix<-file.path(cache_dir,"hwat_extract_spatial_S42")
+writeLines(genes,paste0(prefix,"_features.txt"))
+writeLines(colnames(a)[keep],paste0(prefix,"_cells.txt"))
+writeMM(a[genes,keep,drop=FALSE],paste0(prefix,"_counts.mtx"))
+cat("S42",length(keep),length(genes),"\n")

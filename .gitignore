@@ -1,0 +1,4 @@
+__pycache__/
+*.py[cod]
+/events.tsv
+/Additional_file_*.zip
