@@ -90,6 +90,26 @@ def _text_values(values, label):
     return result
 
 
+def _gene_mask(var):
+    """Read CELLxGENE gene/spike-in labels and 10x assay modalities."""
+    mask = [True] * len(var)
+    modality_columns = ("feature_types", "feature_type")
+    if "feature_biotype" in var.columns:
+        biotypes = list(var["feature_biotype"])
+        cellxgene_labels = {"gene", "spike-in"}
+        if any(isinstance(value, str) and value in cellxgene_labels for value in biotypes):
+            if not all(isinstance(value, str) and value in cellxgene_labels for value in biotypes):
+                raise ValueError("CELLxGENE feature_biotype must contain gene or spike-in for every row")
+            mask = [value == "gene" for value in biotypes]
+            # CELLxGENE's singular feature_type is a gene classification such as protein_coding.
+            modality_columns = ("feature_types",)
+    column = _pick(var.columns, modality_columns, None)
+    if column is not None:
+        modalities = _text_values(var[column], column)
+        mask = [keep and modality == GENE_TYPE for keep, modality in zip(mask, modalities)]
+    return mask
+
+
 def axis_from_anndata(adata, id_column: str | None = None, symbol_column: str | None = None,
                       mixed_modalities: str = "refuse") -> Axis:
     """Build an :class:`Axis` from an AnnData-like object without reading the matrix.
@@ -103,14 +123,14 @@ def axis_from_anndata(adata, id_column: str | None = None, symbol_column: str | 
     if mixed_modalities not in ("refuse", "genes-only"):
         raise ValueError("mixed_modalities must be 'refuse' or 'genes-only'")
     keys = list(adata.var_names)
-    type_column = _pick(var.columns, ("feature_types", "feature_type"), None)
-    if type_column is not None:
-        mask = [value == GENE_TYPE for value in _text_values(var[type_column], type_column)]
-        if not all(mask):
-            if mixed_modalities == "refuse":
-                raise ValueError("Non-gene features present. Use --mixed-modalities genes-only to audit gene rows.")
-            var = var.loc[mask]
-            keys = [key for key, keep in zip(keys, mask) if keep]
+    mask = _gene_mask(var)
+    if not all(mask):
+        if mixed_modalities == "refuse":
+            raise ValueError("Non-gene features present. Use --mixed-modalities genes-only to audit gene rows.")
+        if not any(mask):
+            raise ValueError("No gene records remain after filtering non-gene features")
+        var = var.loc[mask]
+        keys = [key for key, keep in zip(keys, mask) if keep]
     keys = _text_values(keys, ".var_names")
     idc = _pick(var.columns, ID_COLUMNS, id_column)
     if idc is None:

@@ -19,7 +19,7 @@ from __future__ import annotations
 from .core import Axis, Reference, Report, assign_keys, audit, recover
 from .io import axis_from_anndata, load_axis, read_feature_table, read_keyed_table, read_keys
 
-__version__ = "0.1.0"
+__version__ = "0.1.1"
 __all__ = ["Axis", "Reference", "Report", "assign_keys", "audit", "recover", "check", "check_anndata",
            "axis_from_anndata", "load_axis", "read_feature_table", "read_keyed_table", "read_keys"]
 

@@ -6,17 +6,17 @@ Analysis code for *Joining transcriptomic datasets by gene name can silently pai
 
 For every shared name, genejoin checks whether both datasets assign it the same stable ID. For every shared, individually identifiable ID, it checks whether both datasets give it the same name.
 
-Install the [version 0.1.0 release wheel](https://github.com/quitezhou/gene-name-join-audit/releases/tag/v0.1.0) with Python 3.9 or later. The core has no runtime dependencies.
+Install the [version 0.1.1 release wheel](https://github.com/quitezhou/gene-name-join-audit/releases/tag/v0.1.1) with Python 3.9 or later. The core has no runtime dependencies.
 
 ```sh
-python -m pip install "https://github.com/quitezhou/gene-name-join-audit/releases/download/v0.1.0/genejoin-0.1.0-py3-none-any.whl"
+python -m pip install "https://github.com/quitezhou/gene-name-join-audit/releases/download/v0.1.1/genejoin-0.1.1-py3-none-any.whl"
 genejoin check sampleA/features.tsv.gz sampleB/features.tsv.gz
 ```
 
 For AnnData files install the optional dependency.
 
 ```sh
-python -m pip install "genejoin[anndata] @ https://github.com/quitezhou/gene-name-join-audit/releases/download/v0.1.0/genejoin-0.1.0-py3-none-any.whl"
+python -m pip install "genejoin[anndata] @ https://github.com/quitezhou/gene-name-join-audit/releases/download/v0.1.1/genejoin-0.1.1-py3-none-any.whl"
 genejoin check reference.h5ad spatial.h5ad --events discordances.tsv
 ```
 
@@ -38,7 +38,7 @@ For a new analysis, provide two headerless, tab-separated gene tables in their a
 
 ## Reproduce the study figures
 
-The source tree mirrors the paper's supplementary archive. The standalone example above works from this repository alone. To reproduce the study analyses, obtain both supplementary archives from the authors or the article when available. Extract **both into the same separate working directory**. This retains the inputs, manifests, archived third-party materials and exact code snapshot used in the analysis. From that directory run:
+The paper and its supplementary archives use the frozen [genejoin v0.1.0 release](https://github.com/quitezhou/gene-name-join-audit/releases/tag/v0.1.0). For new analyses use v0.1.1, which also reads CELLxGENE gene and spike-in annotations. The standalone example above works from this repository alone. To reproduce the study analyses, obtain both supplementary archives from the authors or the article when available. Extract **both into the same separate working directory**. This retains the inputs, manifests, archived third-party materials and exact code snapshot used in the analysis. From that directory run:
 
 ```sh
 python -m pip install -r requirements-review.txt

@@ -148,13 +148,60 @@ def test_missing_symbols_leave_mechanism_open_until_source_supplied():
     assert audit(a, b).summary["different_ids_duplicate"] == 1
 
 
-def test_anndata_mixed_types_keep_observed_keys_when_filtering():
+@pytest.mark.parametrize("column", ["feature_types", "feature_type"])
+def test_anndata_mixed_types_keep_observed_keys_when_filtering(column):
     a = FakeAnnData(["X", "X-1"], ["Ab1", "E2"])
-    a.var["feature_types"] = ["Antibody Capture", "Gene Expression"]
+    a.var[column] = ["Antibody Capture", "Gene Expression"]
     with pytest.raises(ValueError, match="Non-gene"):
         genejoin.check_anndata(a, a)
     compared = genejoin.axis_from_anndata(a, mixed_modalities="genes-only")
     assert list(compared.by_key) == ["X-1"]
+
+
+def test_cellxgene_gene_classes_in_backed_h5ad(tmp_path):
+    ad = pytest.importorskip("anndata")
+    pd = pytest.importorskip("pandas")
+    ids = ["ENSG00000111640", "ENSG00000251562"]
+    var = pd.DataFrame({"feature_biotype": ["gene", "gene"],
+                        "feature_type": ["protein_coding", "lncRNA"],
+                        "feature_name": ["GAPDH", "MALAT1"]}, index=ids)
+    path = tmp_path / "cellxgene.h5ad"
+    ad.AnnData(shape=(1, 2), var=var).write_h5ad(path)
+    report = genejoin.check(path, path)
+    assert report.ok
+    assert report.summary["shared_keys"] == report.summary["shared_ids"] == 2
+    assert [r.symbol for r in genejoin.load_axis(path).by_key.values()] == ["GAPDH", "MALAT1"]
+
+
+def test_cellxgene_mixed_biotypes_keep_observed_keys():
+    a = FakeAnnData(["X", "X-1"], ["ERCC-00002", "ENSG2"])
+    a.var["feature_type"] = ["synthetic", "protein_coding"]
+    a.var["feature_biotype"] = ["spike-in", "gene"]
+    with pytest.raises(ValueError, match="Non-gene"):
+        genejoin.check_anndata(a, a)
+    compared = genejoin.axis_from_anndata(a, mixed_modalities="genes-only")
+    assert [(r.id, r.key) for r in compared.by_key.values()] == [("ENSG2", "X-1")]
+
+
+def test_cellxgene_and_10x_annotations_respect_both_filters():
+    a = FakeAnnData(["spike", "antibody", "gene"], ["ERCC-00002", "Ab1", "ENSG2"])
+    a.var["feature_biotype"] = ["spike-in", "gene", "gene"]
+    a.var["feature_types"] = ["Gene Expression", "Antibody Capture", "Gene Expression"]
+    assert list(genejoin.axis_from_anndata(a, mixed_modalities="genes-only").by_key) == ["gene"]
+
+
+def test_partial_cellxgene_labels_report_input_error():
+    a = FakeAnnData(["X", "Y"], ["E1", "E2"])
+    a.var["feature_biotype"] = ["gene", None]
+    with pytest.raises(ValueError, match="feature_biotype"):
+        genejoin.axis_from_anndata(a, mixed_modalities="genes-only")
+
+
+def test_all_spike_in_table_reports_no_genes():
+    a = FakeAnnData(["spike"], ["ERCC-00002"])
+    a.var["feature_biotype"] = ["spike-in"]
+    with pytest.raises(ValueError, match="No gene records"):
+        genejoin.axis_from_anndata(a, mixed_modalities="genes-only")
 
 
 # --- command line ------------------------------------------------------------

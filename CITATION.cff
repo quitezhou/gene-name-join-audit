@@ -4,7 +4,7 @@ message: "Please cite this release if you use genejoin or the accompanying audit
 title: "genejoin and supporting code for the transcriptomic gene-name audit"
 authors:
   - name: "Genejoin contributors"
-version: "0.1.0"
+version: "0.1.1"
 date-released: 2026-11-24
 repository-code: "https://github.com/quitezhou/gene-name-join-audit"
-url: "https://github.com/quitezhou/gene-name-join-audit/releases/tag/v0.1.0"
+url: "https://github.com/quitezhou/gene-name-join-audit/releases/tag/v0.1.1"
